@@ -2,6 +2,7 @@
 # Author :  Dewang Shahu 
 # Date    : 27 Feb 2015
 #
+require 'pry'
 
 #methods initialize board
 def initialize_board
@@ -45,8 +46,19 @@ end
 
 #computer picks a square
 def computer_pick_square(board)
-    valid_choice = false
-    position = empty_positions(board).sample
+    winning_lines = [[1,2,3], [4,5,6], [7,8,9], [1,4,7], [2,5,8], [3,6,9], [1,5,9], [3,5,7]]
+    position = nil
+    winning_lines.each do |line|
+      hsh = {line[0] => board[line[0]], line[1] => board[line[1]], line[2] => board[line[2]]}
+      found_two_in_a_row = two_in_a_row(hsh, 'X')
+      if found_two_in_a_row
+        position = found_two_in_a_row
+      end
+    end
+      
+    if !position
+        position = empty_positions(board).sample
+    end
     board[position] = 'O' 
 end
 
@@ -62,6 +74,15 @@ def check_winner(board)
     end
   end  
   return nil
+end
+
+# checks to see if two in a row
+def two_in_a_row(hsh, mrkr)
+  if hsh.values.count(mrkr) == 2
+    hsh.select{|k,v| v == ' '}.keys.first
+  else
+    false
+  end
 end
 
 board = initialize_board
