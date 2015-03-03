@@ -4,6 +4,9 @@
 #
 require 'pry'
 
+#constants
+WINNING_LINES = [[1,2,3], [4,5,6], [7,8,9], [1,4,7], [2,5,8], [3,6,9], [1,5,9], [3,5,7]]
+
 #methods initialize board
 def initialize_board
     board = {}
@@ -29,44 +32,41 @@ end
 def player_pick_square(board)
   valid_choice = false
   begin
-      puts "Pick a square (1-9): "
-      position = gets.chomp.to_i
-      if position > 0 && position < 10
-        if board[position] == ' '
-            board[position] = 'X'
-            valid_choice = true
-          else
-            puts "Position is already filled..please pick another square"
-        end
-      else
-          puts "Please pick between square number 1-9"
+    puts "Pick a square (1-9): "
+    position = gets.chomp.to_i
+    if board.keys.include?(position)
+      if board[position] == ' '
+          board[position] = 'X'
+          valid_choice = true
+        else
+          puts "Position is already filled..please pick another square"
       end
+    else
+        puts "Please pick between square number 1-9"
+    end
   end while !valid_choice  
 end
 
 #computer picks a square
-def computer_pick_square(board)
-    winning_lines = [[1,2,3], [4,5,6], [7,8,9], [1,4,7], [2,5,8], [3,6,9], [1,5,9], [3,5,7]]
-    position = nil
-    winning_lines.each do |line|
-      hsh = {line[0] => board[line[0]], line[1] => board[line[1]], line[2] => board[line[2]]}
-      found_two_in_a_row = two_in_a_row(hsh, 'X')
-      if found_two_in_a_row
-        position = found_two_in_a_row
-      end
+def computer_pick_square(board)    
+  position = nil
+  WINNING_LINES.each do |line|
+    current_grid_status = {line[0] => board[line[0]], line[1] => board[line[1]], line[2] => board[line[2]]}
+    found_two_in_a_row = two_in_a_row(current_grid_status, 'X')
+    if found_two_in_a_row
+      position = found_two_in_a_row
     end
-      
-    if !position
-        position = empty_positions(board).sample
-    end
-    board[position] = 'O' 
+  end
+    
+  if !position
+      position = empty_positions(board).sample
+  end
+  board[position] = 'O' 
 end
 
 #methods to analyse results based on the current positions, it returns the result
 def check_winner(board)
-  winning_lines = [[1,2,3], [4,5,6], [7,8,9], [1,4,7], [2,5,8], [3,6,9], [1,5,9], [3,5,7]]
-  
-  winning_lines.each do |line|
+  WINNING_LINES.each do |line|
     if board[line[0]] == 'X' && board[line[1]] == 'X' && board[line[2]] == 'X'
       return "Player"
     elsif board[line[0]] == 'O' && board[line[1]] == 'O' && board[line[2]] == 'O'
@@ -77,9 +77,9 @@ def check_winner(board)
 end
 
 # checks to see if two in a row
-def two_in_a_row(hsh, mrkr)
-  if hsh.values.count(mrkr) == 2
-    hsh.select{|k,v| v == ' '}.keys.first
+def two_in_a_row(current_grid_status, mrkr)
+  if current_grid_status.values.count(mrkr) == 2
+    current_grid_status.select{|k,v| v == ' '}.keys.first
   else
     false
   end
@@ -87,7 +87,6 @@ end
 
 board = initialize_board
 draw_board(board)
-winner = nil
 
 begin
   player_pick_square(board)
@@ -98,8 +97,8 @@ begin
 end until winner || empty_positions(board).empty?
 
 if winner != nil
-    puts "#{winner} won!"
-  else
-    puts "It's a tie"
+  puts "#{winner} won!"
+else
+  puts "It's a tie"
 end
   
